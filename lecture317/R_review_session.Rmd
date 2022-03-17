@@ -1,3 +1,4 @@
+
 ---
 title: "R Review Session"
 author: "Brett Gordon and Joonhyuk Yang"
@@ -11,6 +12,8 @@ fontsize: 12pt
 ---
 
 ```{r, include=FALSE}
+# second chunk - load required packages - don't touch, but run this part 
+# click run - R run this chunk - run this first
 # We recommend including this entire code chunk at the top of all 
 # your R Markdown files. 'include=FALSE' omits this code in the output
 # but R still runs it.
@@ -33,10 +36,12 @@ opts_chunk$set(echo=TRUE,      # Print the code in all the chunks
 
 This example file uses data from Dominick's, a now defunct grocery store chain in Chicago. First, I read in the data and print out a quick summary of the variables.
 
+
 ```{r}
+#  run line 42 - df table created
 df <- read_excel("dominicks_oj.xlsx")
-str(df)
-head(df)
+str(df) # compactly displaying the internal structure of a R object
+head(df) # print first few lines of the data
 ```
 
 # Manipulating the data
@@ -51,15 +56,15 @@ df <- df %>%
          Dholiday = factor(holiday),
          Dsize = factor(size),
          Dzone = factor(zone))
-head(df)
+head(df) #append these new variables back to df
 ```
 
 Quick tabulations by zone, brand, and brand-size.
 
 ```{r}
-table(df$zone)
+table(df$zone) #dollar sign to indicate data frame
 table(df$brand)
-table(df$brand, df$size)
+table(df$brand, df$size) 
 ```
 
 Summary statistics by brand.
