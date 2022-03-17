@@ -1,0 +1,139 @@
+---
+title: "R Review Session"
+author: "Brett Gordon and Joonhyuk Yang"
+date: "10/07/21"
+output:
+  pdf_document:
+    number_sections: yes
+colorlinks: true
+urlcolor: 'red'
+fontsize: 12pt
+---
+
+```{r, include=FALSE}
+# We recommend including this entire code chunk at the top of all 
+# your R Markdown files. 'include=FALSE' omits this code in the output
+# but R still runs it.
+
+# Load libraries needed for analysis
+library(knitr)                 # Creating PDF output using Markdown
+library(tidyverse)             # Data manipulation and graphing
+library(readxl)                # To use read_excel()
+library(psych)                 # To use corr.test() for correlation matrices
+theme_set(theme_bw())          # Get rid of gray background in plots
+
+# Set some defaults for the R Markdown document
+opts_chunk$set(echo=TRUE,      # Print the code in all the chunks
+               warning=FALSE,  # Don't print warning statements
+               message=FALSE,  # Don't print other R output messages
+               comment=NA)     # Helps produce prettier output
+```
+
+# Setup
+
+This example file uses data from Dominick's, a now defunct grocery store chain in Chicago. First, I read in the data and print out a quick summary of the variables.
+
+```{r}
+df <- read_excel("dominicks_oj.xlsx")
+str(df)
+head(df)
+```
+
+# Manipulating the data
+
+Let's create some new variables.
+
+```{r}
+df <- df %>% 
+  mutate(lnp = log(price),
+         lnq = log(units),
+         Dmerch = factor(merch),
+         Dholiday = factor(holiday),
+         Dsize = factor(size),
+         Dzone = factor(zone))
+head(df)
+```
+
+Quick tabulations by zone, brand, and brand-size.
+
+```{r}
+table(df$zone)
+table(df$brand)
+table(df$brand, df$size)
+```
+
+Summary statistics by brand.
+
+```{r}
+# Total sales, mean price, number of observations *for each* brand
+df %>%
+  group_by(brand) %>%
+  summarize(sum_sales = sum(units),
+            mean_price = mean(price),
+            num_obs = n())
+
+```
+ 
+Summary statistics for a subset of the data.
+ 
+```{r}
+df %>%
+  filter(size==12) %>%
+  group_by(brand) %>%
+  summarize(sum_sales = sum(units),
+            mean_price = mean(price),
+            num_obs = n())
+```
+
+Let me create some handy subsets of the data (and note my variable naming scheme).
+
+```{r}
+df.low <- df %>% filter(zone=="Low")
+df.mmaid12 <- df %>% filter(brand=="MMAID" & size==12)
+df.low.mmaid12 <- df.mmaid12 %>% filter(zone=="Low")
+```
+
+# Plots
+
+## Scatter plots
+
+```{r}
+ggplot(df.low.mmaid12, aes(x=lnq, y=lnp)) +
+  geom_point()
+
+ggplot(df.low.mmaid12, aes(x=lnq, y=lnp, color=Dmerch)) +
+  geom_point()
+
+ggplot(df.low.mmaid12, aes(x=lnq, y=lnp)) +
+  geom_point() + 
+  facet_wrap(~ Dmerch) 
+
+ggplot(df.low.mmaid12, aes(x=lnq, y=lnp)) +
+  geom_point() +
+  geom_smooth(method='lm', se=FALSE)
+
+```
+
+## Line plots
+
+```{r}
+ggplot(df.low.mmaid12, aes(x=week, y=price)) + 
+  geom_line() + 
+  labs(x="Weeknum", y="Price", title="Minute Maid 16 oz. in Zone = Medium")
+```
+
+# Regression
+
+```{r}
+reg1 <- lm(lnq ~ lnp, data=df.low.mmaid12)
+summary(reg1)
+```
+
+The regression indicates that the price elasticity is `r round(reg1$coefficients['lnp'],3)`.  Now I will add zone dummies and an interaction between `lnp` and `Dmerch`.
+
+```{r}
+reg2 <- lm(lnq ~ lnp + Dzone + lnp:Dmerch, data=df.mmaid12)
+summary(reg2)
+```
+
+Now the price elasticity is `r round(reg2$coefficients['lnp'],3)`, which is pretty similar to the first regression. Both estimates are within the reasonable range for a price elasticity.
