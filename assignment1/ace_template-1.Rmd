@@ -1,0 +1,79 @@
+---
+title: "Ace Hardware"
+subtitle: "Case #1: Ace Hardware"
+author: "Maryclare Leonard"
+date: "March 22 2022"
+output:
+  pdf_document:
+    number_sections: yes
+colorlinks: true
+urlcolor: 'red'
+fontsize: 12pt
+header-includes: \usepackage{color,soul}
+---
+
+```{r, include=FALSE}
+# We recommend including this entire code chunk at the top of all 
+# your R Markdown files. 'include=FALSE' omits this code in the output
+# but R still runs it.
+
+# Load libraries needed for analysis
+library(knitr)                 # Creating PDF output using Markdown
+library(tidyverse)             # Data manipulation and graphing
+library(readxl)                # To use read_excel()
+library(psych)                 # To use corr.test() for correlation matrices
+theme_set(theme_bw())          # Get rid of gray background in plots
+
+# Set some defaults for the R Markdown document
+opts_chunk$set(echo=TRUE,      # Print the code in all the chunks
+               warning=FALSE,  # Don't print warning statements
+               message=FALSE,  # Don't print other R output messages
+               comment=NA)     # Helps produce prettier output
+```
+
+# Technical Section
+```{r}
+# Read in the data
+# NOTE: This assumes the current working directory contains these files
+df.hist <- read_excel("ace_historical.xlsx")
+df.test <- read_excel("ace_testlearn.xlsx")
+
+```
+
+## Data Exploration
+```{r}
+
+#plot population to historical price
+plot(df.hist$population, df.hist$regprice, main="Historical Price Changes with Population Increase",
+   xlab="Population ", ylab="Price", pch=19)
+
+#plot population to test price
+plot(df.test$population, df.test$regprice, main="Test Price Changes with Population Increase",
+   xlab="Population ", ylab="Price", pch=19)
+
+```
+
+### Data Exploration: Part A
+Based on the the first of the two previous graphs, historically, price decreased as the population in the area increased. 
+
+However, in the tests, which is displayed in the second of the two graphs, price is not related to the population. The price is set independent of the population of the area. Areas with the same population have prices all over the board, from $9 - $10 for the bottom product and from $12 to $14 for the top product.
+
+```{r}
+# Part 1 Data Exploration
+#plot population to units
+plot(df.test$population, df.test$units, main="Units as a function of the Population in the Test",
+   xlab="Population ", ylab="Units", pch=19)
+
+```
+
+### Data Exploration: Part B
+Based on the above graph, the units sold reaches its peak at the lowest population level. The maximum at the highest population is almost half of this peak. The maximums at each population size trends down as population increases. Therefore, Ace does not sell more in areas with larger population.
+
+## Analytics Elasticity
+```{r}
+
+```
+
+# Managerial Discussion
+
+Managerial discussion goes here.
