@@ -22,6 +22,7 @@ library(knitr)                 # Creating PDF output using Markdown
 library(tidyverse)             # Data manipulation and graphing
 library(readxl)                # To use read_excel()
 library(psych)                 # To use corr.test() for correlation matrices
+library(scales)                # for percentages
 theme_set(theme_bw())          # Get rid of gray background in plots
 
 # Set some defaults for the R Markdown document
@@ -71,8 +72,42 @@ Based on the above graph, the units sold reaches its peak at the lowest populati
 
 ## Analytics Elasticity
 ```{r}
-
+df.hist <- df.hist %>% 
+  mutate(lnpHist = log(regprice),
+         lnqHist = log(units))
+head(df.hist)
+reg1 <- lm(lnqHist ~ lnpHist, data=df.hist)
+summary(reg1)
 ```
+
+The regression indicates that the price elasticity is for the historical data is `r round(reg1$coefficients['lnpHist'],3)`.
+
+```{r}
+df.test <- df.test %>% 
+  mutate(lnpTest = log(regprice),
+         lnqTest = log(units))
+head(df.test)
+reg2 <- lm(lnqTest ~ lnpTest, data=df.test)
+summary(reg2)
+```
+
+For the experiment, the price elasticity is `r round(reg2$coefficients['lnpTest'],3)`, 
+
+Therefore, the price elasticity decreases in the experiment. For a increase in price by $1, the percentage quantity purchased will decrease by `r round(reg1$coefficients['lnpHist'],3)` - `r round(reg2$coefficients['lnpTest'],3)` = `r round(reg1$coefficients['lnpHist'],3) -  round(reg2$coefficients['lnpTest'],3)`.
+
+## Pricing Recommendation
+
+Since the Log-Log Model demonstrated a price elasticity for the experiment of `r round(reg1$coefficients['lnphist'],3)`, the gross margin percentage can be calculated as follows:
+
+`r -1` / `r -1 * round(reg2$coefficients['lnpTest'],3)` = `r round(-1/(-1*(round(reg2$coefficients['lnpTest'],3))),3)`
+
+Margin: `r percent(-1/(-1*(round(reg2$coefficients['lnpTest'],3))))`
+
+Therefore, based on this case, each product should earn a margin of `r percent(-1/(-1*(round(reg2$coefficients['lnpTest'],3))))`
+
+The first is at cost of $8.80. The price should therefore be $16.54.
+
+The second is at cost of $5.43. The price should therefore be $4.78.
 
 # Managerial Discussion
 
