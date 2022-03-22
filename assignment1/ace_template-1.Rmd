@@ -45,11 +45,11 @@ df.test <- read_excel("ace_testlearn.xlsx")
 ```{r}
 
 #plot population to historical price
-plot(df.hist$population, df.hist$regprice, main="Historical Price Changes with Population Increase",
+plot(df.hist$mpop, df.hist$regprice, main="Historical Price Changes with Population Increase",
    xlab="Population ", ylab="Price", pch=19)
 
 #plot population to test price
-plot(df.test$population, df.test$regprice, main="Test Price Changes with Population Increase",
+plot(df.test$mpop, df.test$regprice, main="Test Price Changes with Population Increase",
    xlab="Population ", ylab="Price", pch=19)
 
 ```
@@ -95,6 +95,8 @@ For the experiment, the price elasticity is `r round(reg2$coefficients['lnpTest'
 
 Therefore, the price elasticity decreases in the experiment. For a increase in price by $1, the percentage quantity purchased will decrease by `r round(reg1$coefficients['lnpHist'],3)` - `r round(reg2$coefficients['lnpTest'],3)` = `r round(reg1$coefficients['lnpHist'],3) -  round(reg2$coefficients['lnpTest'],3)`.
 
+# Managerial Discussion
+
 ## Pricing Recommendation
 
 Since the Log-Log Model demonstrated a price elasticity for the experiment of `r round(reg1$coefficients['lnphist'],3)`, the gross margin percentage can be calculated as follows:
@@ -109,6 +111,79 @@ The first is at cost of $8.80. The price should therefore be $16.54.
 
 The second is at cost of $5.43. The price should therefore be $4.78.
 
-# Managerial Discussion
+## Zone Pricing
+```{r}
+#mean population calculation
+mean_pop <- mean(df.test$population)
+print(mean_pop)
+```
 
-Managerial discussion goes here.
+```{r}
+#create two data tables for below and above mean 
+df.test.low <- df.test %>% filter(population < mean_pop)
+df.test.high <- df.test %>% filter(population > mean_pop)
+```
+
+### Part A
+```{r}
+#above mean
+df.test.high <- df.test.high %>% 
+  mutate(lnpTestAbove = log(regprice),
+         lnqTestAbove = log(units))
+head(df.test.high)
+reg4 <- lm(lnqTestAbove ~ lnpTestAbove, data=df.test.high)
+summary(reg4)
+```
+For the stores with below average population, the price elasticity is `r round(reg4$coefficients['lnpTestAbove'],3)`. The product is very inelastic and consumers are price insensitive.
+
+
+### Part B
+```{r}
+#below mean
+df.test.low <- df.test.low %>% 
+  mutate(lnpTestBelow = log(regprice),
+         lnqTestBelow = log(units))
+head(df.test.low)
+reg3 <- lm(lnqTestBelow ~ lnpTestBelow, data=df.test.low)
+summary(reg3)
+```
+
+For the stores with above average population, the price elasticity is `r round(reg3$coefficients['lnpTestBelow'],3)`. The product is very inelastic and consumers are price insensitive.
+
+Knowing that:
+For the stores with below average population, the price elasticity is `r round(reg4$coefficients['lnpTestAbove'],3)`.
+For the stores with above average population, the price elasticity is `r round(reg3$coefficients['lnpTestBelow'],3)`.
+Both products are very inelastic and consumers are price insensitive.
+
+
+### Part C
+Considering what we just learned in Part B, this zone pricing policy is not dependent upon population to determine which zone or pricing strategy a store should fall in. 
+
+Note the elasticities only vary by `r round(reg4$coefficients['lnpTestAbove'],3) - round(reg3$coefficients['lnpTestBelow'],3)`. With this experimental model, the price elasticity remains relatively consistent across zones and is therefore better to employ versus the historical model that had even higher price elasticities.
+
+## Your Recommended Next Steps
+Since there are 10,000 items across the every store I would recommend testing one item in each category and employing a markup procedure that works for this item across the rest of the items in the category. For example all single sell nails will be marked up the same, based on the results from one nail. However, a package of nails would have a different markup since you are buying in bulk, yet bulk sets of nails of the similar quantity can follow the markup procedure of this set. 
+
+In scaling, start with the best sellers first to ensure that you are maximizing profit out of these items that are frequently being purchased.
+
+## Further Discussions
+As illustrated discussing the impact of the population results in understanding that the population should not have an effect on the zone that a store falls in in the pricing model, if zone pricing is employed.
+
+###DIST
+```{r}
+plot(df.test$mdist, df.test$units, main="Units as a function of the MDIST to Competitor",
+   xlab="MDIST ", ylab="Units", pch=19)
+
+```
+
+```{r}
+plot(df.test$distance, df.test$units, main="Units as a function of the Distance to Competitor",
+   xlab="Distance ", ylab="Units", pch=19)
+
+```
+Mean distance (mdist) was not beneficial in my analysis in terms of being explanatory. The two above graphs display the same data points in space, however the postitive distance measures are easier to compare against one another.
+In the end we learn that the further the distance from the competitor, the more units sold.
+
+
+
+
