@@ -1,0 +1,59 @@
+---
+title: "Wacaha"
+subtitle: "Course number/title"
+author: "Your name"
+date: "The/date/here"
+output:
+  pdf_document:
+    number_sections: yes
+colorlinks: true
+urlcolor: 'red'
+fontsize: 12pt
+header-includes: \usepackage{color,soul}
+---
+
+```{r, include=FALSE}
+# We recommend including this entire code chunk at the top of all 
+# your R Markdown files. 'include=FALSE' omits this code in the output
+# but R still runs it.
+
+# Load libraries needed for analysis
+library(knitr)                 # Creating PDF output using Markdown
+library(tidyverse)             # Data manipulation and graphing
+library(readxl)                # To use read_excel()
+library(psych)                 # To use corr.test() for correlation matrices
+theme_set(theme_bw())          # Get rid of gray background in plots
+
+# Set some defaults for the R Markdown document
+opts_chunk$set(echo=TRUE,      # Print the code in all the chunks
+               warning=FALSE,  # Don't print warning statements
+               message=FALSE,  # Don't print other R output messages
+               comment=NA)     # Helps produce prettier output
+```
+
+# Technical section
+
+This is where your technical material should go. You might start by reading in the data.
+
+## Data setup
+```{r}
+# Read in the data
+df <- read_excel("small_salsa.xlsx")
+
+# Create logged prices and quantities
+df <- df %>% 
+  mutate(ln_p = log(price),
+         ln_q = log(units),
+         Dholiday = factor(holiday))
+```
+
+You could keep adding lines of code to the chunk above, or start a new chunk with additional analysis below.
+
+```{r}
+# More code here
+
+```
+
+# Managerial Discussion
+
+Managerial discussion goes here.
