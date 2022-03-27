@@ -69,22 +69,31 @@ reg1 <- lm(ln_q ~ ln_p + Dzone + Dholiday, data=df)
 summary(reg1)
 ```
 
-The regression indicates that the price elasticity is for the historical data is `r round(reg1$coefficients['ln_p'],3)`.
+The regression indicates that the price elasticity is `r round(reg1$coefficients['ln_p'],3)`.
 
-## Regression No Holiday 
+## Regression Calculation for Zone 1
 ```{r}
-reg.noholiday <- lm(ln_q ~ ln_p + Dstore, data=df %>% filter(Dholiday==0))
-summary(reg.noholiday)
+reg2 <- lm(ln_q ~ ln_p + Dholiday, data=df %>% filter(Dzone==1))
+summary(reg2)
 ```
 
-The regression indicates that the price elasticity is for the historical data is `r round(reg.noholiday$coefficients['ln_p'],3)`. This is a minor change to our original regression's price elasticity.
+The regression indicates that the price elasticity  for Zone 1 is `r round(reg2$coefficients['ln_p'],3)`.
 
-You could keep adding lines of code to the chunk above, or start a new chunk with additional analysis below.
-
-```{r}
-# More code here
-
+## Regression Calculation for Zone 2
+``` {r}
+reg3 <- lm(ln_q ~ ln_p + Dholiday, data=df %>% filter(Dzone==2))
+summary(reg3)
 ```
+
+The regression indicates that the price elasticity for Zone 2 is `r round(reg3$coefficients['ln_p'],3)`.
+
+## Population Regression Calculation for Zone 1
+```{r}
+reg4 <- lm(ln_q ~ ln_p + pop, data=df %>% filter(Dzone==1))
+summary(reg4)
+```
+
+The regression indicates that the price elasticity  for Zone 1 is `r round(reg4$coefficients['ln_p'],3)`.
 
 # Managerial Discussion
 
