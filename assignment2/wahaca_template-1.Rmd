@@ -1,8 +1,8 @@
 ---
 title: "Wacaha"
-subtitle: "Course number/title"
-author: "Your name"
-date: "The/date/here"
+subtitle: "Pricing and Retail Analytics"
+author: "Natalie Kvochak, Maryclare Leonard, Sean O'Grady"
+date: "3/29/31"
 output:
   pdf_document:
     number_sections: yes
@@ -44,8 +44,32 @@ df <- read_excel("small_salsa.xlsx")
 df <- df %>% 
   mutate(ln_p = log(price),
          ln_q = log(units),
-         Dholiday = factor(holiday))
+         Dholiday = factor(holiday),
+         Dstore = factor(store),
+         Dzone= factor(zone))
+
 ```
+
+## Data Exploration
+```{r}
+#plot price versus units
+plot(df$price, df$units,main="Units as a function of price",xlab="Price",ylab="Units",pch=19)
+
+plot(df$ln_q,df$ln_p,main="Log price as a function of log units",xlab="Log Units",ylab="Log Price",pch=19)
+```
+
+## Correlation
+```{r}
+corr.test(df %>% select(price, pop, units, holiday))
+```
+
+## Regression
+```{r}
+reg1 <- lm(ln_q ~ ln_p + Dzone + Dholiday, data=df)
+summary(reg1)
+```
+
+The regression indicates that the price elasticity is for the historical data is `r round(reg1$coefficients['ln_p'],3)`.
 
 You could keep adding lines of code to the chunk above, or start a new chunk with additional analysis below.
 
