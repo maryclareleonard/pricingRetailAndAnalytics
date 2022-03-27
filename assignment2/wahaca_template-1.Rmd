@@ -71,6 +71,14 @@ summary(reg1)
 
 The regression indicates that the price elasticity is for the historical data is `r round(reg1$coefficients['ln_p'],3)`.
 
+## Regression No Holiday 
+```{r}
+reg.noholiday <- lm(ln_q ~ ln_p + Dstore, data=df %>% filter(Dholiday==0))
+summary(reg.noholiday)
+```
+
+The regression indicates that the price elasticity is for the historical data is `r round(reg.noholiday$coefficients['ln_p'],3)`. This is a minor change to our original regression's price elasticity.
+
 You could keep adding lines of code to the chunk above, or start a new chunk with additional analysis below.
 
 ```{r}
