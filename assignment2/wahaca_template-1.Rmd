@@ -2,7 +2,7 @@
 title: "Wacaha"
 subtitle: "Pricing and Retail Analytics"
 author: "Natalie Kvochak, Maryclare Leonard, Sean O'Grady"
-date: "3/29/31"
+date: "3/29/21"
 output:
   pdf_document:
     number_sections: yes
@@ -33,8 +33,6 @@ opts_chunk$set(echo=TRUE,      # Print the code in all the chunks
 
 # Technical section
 
-This is where your technical material should go. You might start by reading in the data.
-
 ## Data setup
 ```{r}
 # Read in the data
@@ -53,9 +51,11 @@ df <- df %>%
 ## Data Exploration
 ```{r}
 #plot price versus units
-plot(df$price, df$units,main="Units as a function of price",xlab="Price",ylab="Units",pch=19)
+plot(df$price, df$units,main="Units as a function of price",
+     xlab="Price",ylab="Units",pch=19)
 
-plot(df$ln_q,df$ln_p,main="Log price as a function of log units",xlab="Log Units",ylab="Log Price",pch=19)
+plot(df$ln_q,df$ln_p,main="Log price as a function of log units",
+     xlab="Log Units", ylab="Log Price",pch=19)
 ```
 
 ## Correlation
