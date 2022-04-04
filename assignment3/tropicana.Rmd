@@ -1,0 +1,252 @@
+---
+title: "IA4: Tropicana"
+subtitle: "Section 2"
+author: "Maryclare Leonard, Sean O'Grady, & Natalie Kvochak"
+date: "4/5/22"
+output:
+  pdf_document:
+    number_sections: yes
+colorlinks: true
+urlcolor: 'red'
+fontsize: 12pt
+header-includes: \usepackage{color,soul}
+---
+
+```{r, include=FALSE}
+# We recommend including this entire code chunk at the top of all 
+# your R Markdown files. 'include=FALSE' omits this code in the output
+# but R still runs it.
+
+# Load libraries needed for analysis
+library(knitr)                 # Creating PDF output using Markdown
+library(tidyverse)             # Data manipulation and graphing
+library(readxl)                # To use read_excel()
+library(psych)                 # To use corr.test() for correlation matrices
+theme_set(theme_bw())          # Get rid of gray background in plots
+
+# Set some defaults for the R Markdown document
+opts_chunk$set(echo=TRUE,      # Print the code in all the chunks
+               warning=FALSE,  # Don't print warning statements
+               message=FALSE,  # Don't print other R output messages
+               comment=NA)     # Helps produce prettier output
+```
+
+# Technical section
+
+This is where your technical material should go. You might start by reading in the data.
+
+```{r}
+# Read the data
+df <- read_excel("tropicana.xlsx")
+
+# Create some variables
+df <- df %>% mutate(ln_p=log(price_tr_12),
+                   ln_q=log(units_tr_12),
+                   Dmerch=factor(merch_tr_12),
+                   Dzone=factor(zone),
+                   Dyear=factor(year))
+```
+
+## Explore Your Data
+You are encouraged to use these visualizations of your data, but you can do other visualizations if you desire.
+
+```{r}
+
+# Plot Units Sold
+ggplot(df, aes(x=weeknum, y=units_tr_12)) + 
+  geom_line() + 
+  facet_wrap( ~ zone, ncol=2) +
+  labs(x="Weeknum", y="Units")
+
+# Plot Prices
+ggplot(df, aes(x=weeknum)) +
+  geom_line(aes(y=reg_tr_12), color="blue") +
+  geom_line(aes(y=price_tr_12), color="red") + 
+  facet_wrap( ~ zone, ncol=2) +
+  labs(x="Weeknum", y="Price")
+
+# Plot Log Price vs. Log Units
+ggplot(df, aes(x=ln_q, y=ln_p)) + 
+  geom_point() + 
+  facet_wrap( ~ zone, ncol=2) +
+  geom_smooth(method='lm', se=FALSE, orientation="y") +
+  labs(x="ln(Units)", y="ln(Price)")
+
+# Plot Log Price vs. Log Units
+ggplot(df, aes(y=ln_q, x=ln_p)) + 
+  geom_point() + 
+  facet_wrap( ~ zone, ncol=2) +
+  geom_smooth(method='lm', se=FALSE) +
+  labs(y="ln(Units)", x="ln(Price)") + coord_flip()
+
+ggplot(df, aes(y=ln_q, x=ln_p, col=Dmerch)) + 
+  geom_point() + 
+  facet_wrap( ~ zone, ncol=2) +
+  geom_smooth(method='lm', se=FALSE) +
+  labs(y="ln(Units)", x="ln(Price)") + 
+  coord_flip()
+
+df.med <- df %>% filter(zone == "Medium")
+
+ggplot(df.med, aes(x=ln_q, y=ln_p, col=Dmerch)) + 
+  geom_point() + 
+  geom_smooth(method='lm', se=FALSE) +
+  labs(x="ln(Units)", y="ln(Price)")
+
+
+
+summary(lm(ln_q ~ ln_p + ln_p:Dmerch + Dmerch , data=df.med))
+
+summary(lm(ln_q ~ ln_p, data=df.med %>% filter(merch_tr_12 == 0)))
+ggplot(df.med %>% filter(merch_tr_12 == 0), aes(x=ln_q, y=ln_p)) + 
+  geom_point() + 
+  xlim(5,12) + ylim(-0.1, 0.8) +
+  geom_smooth(method='lm', se=FALSE) +
+  labs(x="ln(Units)", y="ln(Price)")
+
+summary(lm(ln_q ~ ln_p, data=df.med %>% filter(merch_tr_12 == 1)))
+ggplot(df.med %>% filter(merch_tr_12 == 1), aes(x=ln_q, y=ln_p)) + 
+  geom_point() + 
+  xlim(5,12) + ylim(-0.1, 0.8) +
+  geom_smooth(method='lm', se=FALSE) +
+  labs(x="ln(Units)", y="ln(Price)")
+
+
+
+
+####
+summary(lm(ln_q ~ ln_p, data=df.med %>% filter(merch_tr_12 == 0)))
+p1 <- ggplot(df.med %>% filter(merch_tr_12 == 0), aes(y=ln_q, x=ln_p)) + 
+  geom_point() + 
+  ylim(5,12) + xlim(-0.1, 0.8) +
+  geom_smooth(method='lm', se=FALSE) +
+  labs(x="ln(P)", y="ln(Q)")
+
+summary(lm(ln_q ~ ln_p, data=df.med %>% filter(merch_tr_12 == 1)))
+p2 <- ggplot(df.med %>% filter(merch_tr_12 == 1), aes(y=ln_q, x=ln_p)) + 
+  geom_point() + 
+  ylim(5,12) + xlim(-0.1, 0.8) +
+  geom_smooth(method='lm', se=FALSE) +
+  labs(x="ln(P)", y="ln(Q)")
+
+gridExtra::grid.arrange(p1,p2, ncol=2)
+
+ggplot(df.med, aes(y=ln_q, x=ln_p, col=Dmerch)) + 
+  geom_point() + 
+  #xlim(5,12) + ylim(-0.1, 0.8) +
+  geom_smooth(method='lm', se=FALSE) +
+  coord_flip()
+
+
+p1 <- ggplot(df, aes(x=ln_q, y=ln_p, col=Dmerch)) + 
+  geom_point() + 
+  facet_wrap( ~ zone, ncol=2) +
+  geom_smooth(method='lm', se=FALSE, orientation="y") +
+  labs(x="ln(Units)", y="ln(Price)") + labs(title="Original")
+
+p2 <- ggplot(df, aes(y=ln_q, x=ln_p, col=Dmerch)) + 
+  geom_point() + 
+  facet_wrap( ~ zone, ncol=2) +
+  geom_smooth(method='lm', se=FALSE) +
+  labs(y="ln(Units)", x="ln(Price)") + 
+  coord_flip() + labs(title="New")
+
+gridExtra::grid.arrange(p1,p2, ncol=2)
+
+
+
+
+
+```
+
+
+## Run the main regression model
+
+You are encouraged to use this regression, however you can complement your analysis with data exploration and additional regressions.
+
+```{r}
+reg.tr <- lm(ln_q ~ ln_p + ln_p:Dmerch + Dmerch + 
+               Dyear + Dzone, data=df)
+```
+
+Be sure to finalize your regression and ... No more regressions to run after this!
+
+## Scenario Analysis
+
+### Scenario 0 (Baseline)
+
+```{r}
+#run main regression 
+reg.tr <- lm(ln_q ~ ln_p + ln_p:Dmerch + Dmerch + 
+               Dyear + Dzone, data=df)
+#copy data 
+df.pred = df
+
+#Predict ln(units) using the actual data -- the output are the fitted values
+df.pred$ln_pred_units_tr_12<- predict(reg.tr, df.pred)
+
+# Convert Log to Units and Compute Profit
+df.pred <- df.pred %>% mutate(units_tr_12 = exp(ln_pred_units_tr_12),
+profit_tr_12 = units_tr_12*(price_tr_12 - cost_tr_12))
+
+# Create a table to summarize predicted profit for baseline
+df.pred %>%
+  group_by(year) %>%
+  summarize(sum_profits = sum(profit_tr_12)) %>%
+  kable(digits=0)
+
+#create a table to summarize by zone and filter by 2018 
+df.pred %>%
+  filter(year==2018)%>%
+  group_by(zone) %>%
+  summarize(sum_profits = sum(profit_tr_12)) %>%
+  kable(digits=0)
+```
+
+
+### Scenario 1
+
+```{r}
+# Implement the scenario!
+# This is *not* the same scenario from the Energy Bar case in class.
+# You need to modify the original data to alter the price and merchandise variables
+# using the *_scenario variables that we provide.
+
+df.pred2 <- df
+
+df.pred2 <- df.pred2 %>%
+  filter(year==2018) %>%
+  mutate (price_tr_12 = price_tr_12_scenario1,
+           merch_tr_12 = merch_tr_12_scenario1)%>%
+  mutate (ln_p = log(price_tr_12),
+          Dmerch = factor(merch_tr_12))
+
+# Use the regression model to predict using the modified data
+df.pred2$ln_pred_units_tr_12 <- predict(reg.tr, df.pred2)
+
+# Convert Log to Units and Compute Profit
+df.pred2 <- df.pred2 %>% mutate(units_tr_12 = exp(ln_pred_units_tr_12),
+profit_tr_12_scenario1 = units_tr_12*(price_tr_12 - cost_tr_12))
+
+# Create a table to summarize predicted profit for the alternative scenario
+df.pred2 %>%
+  group_by(year) %>%
+  summarize(sum_profits = sum(profit_tr_12_scenario1)) %>%
+  kable(digits=0)
+
+#create a table to summarize by zone 
+df.pred2 %>%
+  group_by(zone) %>%
+  summarize(sum_profits = sum(profit_tr_12_scenario1)) %>%
+  kable(digits=0)
+
+```
+
+
+
+### Compare the Scenarios
+
+# Managerial Discussion
+
+Managerial discussion goes here.
+
